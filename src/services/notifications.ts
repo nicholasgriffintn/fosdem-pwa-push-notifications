@@ -24,6 +24,18 @@ export function createNotificationPayload(bookmark: EnrichedBookmark): Notificat
 	};
 }
 
+export function createDailySummaryPayload(bookmarks: EnrichedBookmark[], day: string): NotificationPayload {
+	const totalEvents = bookmarks.length;
+	const firstEvent = bookmarks[0];
+	const lastEvent = bookmarks[bookmarks.length - 1];
+	
+	return {
+		title: `Your FOSDEM Day ${day} Summary`,
+		body: `You have ${totalEvents} events today, starting from ${firstEvent.startTime} (${firstEvent.title}) until ${lastEvent.startTime} (${lastEvent.title})`,
+		url: `https://fosdempwa.com/bookmarks?day=${day}&year=${constants.YEAR}`,
+	};
+}
+
 export async function sendNotification(
 	subscription: Subscription,
 	notification: NotificationPayload,
