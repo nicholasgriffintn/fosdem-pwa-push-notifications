@@ -19,25 +19,12 @@ async function trigger(event: { cron?: string }, env: Env, ctx: ExecutionContext
 	// TODO: We need to send a notification to the user if they have bookmarks that are starting soon (15 minutes before)
 	// TODO: Will need some way of detecting if a user has been sent a notification for a bookmark already
 
-	const toBase64 = (base64url: string) => {
-		return base64url.replace(/-/g, '+').replace(/_/g, '/');
-	};
+	const publicKey = env.VAPID_PUBLIC_KEY;
+	const privateKey = env.VAPID_PRIVATE_KEY;
 
-	const base64ToUint8Array = (base64: string) => {
-		const binaryString = atob(base64);
-		const bytes = new Uint8Array(binaryString.length);
-		for (let i = 0; i < binaryString.length; i++) {
-			bytes[i] = binaryString.charCodeAt(i);
-		}
-		return bytes;
-	};
-
-	const publicKey = toBase64(env.VAPID_PUBLIC_KEY);
-	const privateKey = toBase64(env.VAPID_PRIVATE_KEY);
-
-	const keys = await ApplicationServerKeys.generate({
-		publicKey: base64ToUint8Array(publicKey),
-		privateKey: base64ToUint8Array(privateKey)
+	const keys = await ApplicationServerKeys.fromJSON({
+		publicKey,
+		privateKey
 	});
 
 	const testNotification = {
