@@ -19,7 +19,7 @@ export default {
 			body: `This is a test notification at ${new Date().toISOString()}`,
 		}
 
-		const subscriptions = await env.DB.prepare("SELECT * FROM subscriptions").run()
+		const subscriptions = await env.DB.prepare("SELECT * FROM subscription").run()
 
 		console.log(subscriptions)
 
