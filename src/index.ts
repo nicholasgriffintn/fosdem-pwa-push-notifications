@@ -1,7 +1,15 @@
-import { triggerNotifications } from "./controllers/notifications";
+import { triggerNotifications, triggerTestNotification } from "./controllers/notifications";
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext) {
+		const url = new URL(request.url);
+		const isTestMode = url.searchParams.has("test");
+
+		if (isTestMode) {
+			await triggerTestNotification(env, ctx);
+			return new Response("Test notification sent");
+		}
+
 		const event = { cron: "fetch" };
 		await triggerNotifications(event, env, ctx);
 		return new Response("OK");

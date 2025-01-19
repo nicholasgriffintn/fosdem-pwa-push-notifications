@@ -1,4 +1,5 @@
-import { getApplicationKeys, sendNotification, createNotificationPayload } from "../services/notifications";
+import type { ApplicationServerKeys } from "webpush-webcrypto";
+
 import { getFosdemData, getCurrentDay } from "../services/fosdem-data";
 import { 
 	getUserBookmarks, 
@@ -6,7 +7,64 @@ import {
 	getBookmarksForDay,
 	getBookmarksStartingSoon,
 } from "../services/bookmarks";
-import type { Subscription } from "../types";
+import { getApplicationKeys, sendNotification, createNotificationPayload } from "../services/notifications";
+import type { Subscription, EnrichedBookmark } from "../types";
+
+async function processUserNotifications(
+	subscription: Subscription,
+	bookmarks: EnrichedBookmark[],
+	keys: ApplicationServerKeys,
+	env: Env
+) {
+   // TODO: Will need some way of detecting if a user has been sent a notification for a bookmark already
+
+	const notifications = bookmarks.map(createNotificationPayload);
+
+	await Promise.all(notifications.map(async (notification) => {
+		try {
+			await sendNotification(subscription, notification, keys, env);
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : "Unknown error";
+			console.error(
+				`Error sending notification to ${subscription.user_id}: ${errorMessage}`,
+			);
+			throw error;
+		}
+	}));
+}
+
+export async function triggerTestNotification(env: Env, ctx: ExecutionContext) {
+	const keys = await getApplicationKeys(env);
+	const fosdemData = await getFosdemData();
+
+	const testSubscription = await env.DB.prepare(
+		"SELECT user_id, endpoint, auth, p256dh FROM subscription WHERE user_id = ?",
+	)
+		.bind("1")
+		.first();
+
+	if (!testSubscription) {
+		throw new Error("Test subscription not found");
+	}
+
+	const subscription: Subscription = {
+		user_id: testSubscription.user_id as string,
+		endpoint: testSubscription.endpoint as string,
+		auth: testSubscription.auth as string,
+		p256dh: testSubscription.p256dh as string,
+	};
+
+	const bookmarks = await getUserBookmarks(subscription.user_id, env);
+	const enrichedBookmarks = enrichBookmarks(bookmarks, fosdemData.events);
+	const dayOneBookmarks = getBookmarksForDay(enrichedBookmarks, "1");
+
+	if (!dayOneBookmarks.length) {
+		throw new Error("No bookmarks found for day 1");
+	}
+
+	await processUserNotifications(subscription, [dayOneBookmarks[0]], keys, env);
+	console.log("Test notification sent successfully");
+}
 
 export async function triggerNotifications(
 	event: { cron?: string },
@@ -72,22 +130,7 @@ export async function triggerNotifications(
 					return;
 				}
 
-				// TODO: Will need some way of detecting if a user has been sent a notification for a bookmark already
-
-				const notifications = bookmarksStartingSoon.map(createNotificationPayload);
-
-				await Promise.all(notifications.map(async (notification) => {
-					try {
-						await sendNotification(typedSubscription, notification, keys, env);
-					} catch (error) {
-						const errorMessage = error instanceof Error ? error.message : "Unknown error";
-						console.error(
-							`Error sending notification to ${typedSubscription.user_id}: ${errorMessage}`,
-						);
-						throw error;
-					}
-				}));
-
+				await processUserNotifications(typedSubscription, bookmarksStartingSoon, keys, env);
 				return;
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : "Unknown error";
