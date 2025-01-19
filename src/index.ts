@@ -8,6 +8,13 @@ export default {
 			throw new Error("VAPID details not set");
 		}
 
+		// TODO: This needs to be done in a much more complex way, this is just for testing at the moment.
+		// TODO: We need to get the latest FOSDEM schedule data
+		// TODO: We need to get a list of subscriptions first for each user
+		// TODO: We need to get the user's bookmarks
+		// TODO: We need to check if any of the bookmarks are starting soon
+		// TODO: We need to send a notification to the user if they have bookmarks that are starting soon (15 minutes before)
+
 		webPush.setVapidDetails(
 			env.VAPID_EMAIL,
 			env.VAPID_PUBLIC_KEY,
@@ -62,7 +69,7 @@ export default {
 				return result;
 			} catch (error: any) {
 				console.error(`Error sending notification to ${subscription.user_id}: ${error.message}`);
-				
+
 				env.ANALYTICS.writeDataPoint({
 					blobs: [
 						"failure",
