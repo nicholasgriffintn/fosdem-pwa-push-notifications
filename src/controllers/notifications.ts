@@ -6,6 +6,7 @@ import {
 	enrichBookmarks, 
 	getBookmarksForDay,
 	getBookmarksStartingSoon,
+	markNotificationSent,
 } from "../services/bookmarks";
 import { getApplicationKeys, sendNotification, createNotificationPayload } from "../services/notifications";
 import type { Subscription, EnrichedBookmark } from "../types";
@@ -16,13 +17,11 @@ async function processUserNotifications(
 	keys: ApplicationServerKeys,
 	env: Env
 ) {
-   // TODO: Will need some way of detecting if a user has been sent a notification for a bookmark already
-
-	const notifications = bookmarks.map(createNotificationPayload);
-
-	await Promise.all(notifications.map(async (notification) => {
+	await Promise.all(bookmarks.map(async (bookmark) => {
 		try {
+			const notification = createNotificationPayload(bookmark);
 			await sendNotification(subscription, notification, keys, env);
+			await markNotificationSent(bookmark.id, env);
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : "Unknown error";
 			console.error(

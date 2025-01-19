@@ -3,7 +3,7 @@ import type { FosdemEvent, Bookmark, EnrichedBookmark } from "../types";
 
 export async function getUserBookmarks(userId: string, env: Env): Promise<Bookmark[]> {
 	const bookmarks = await env.DB.prepare(
-		"SELECT id, user_id, type, status, year, slug, priority FROM bookmark WHERE user_id = ? AND type = 'bookmark_event' AND status = 'favourited' AND year = ?",
+		"SELECT id, user_id, type, status, year, slug, priority FROM bookmark WHERE user_id = ? AND type = 'bookmark_event' AND status = 'favourited' AND year = ? AND last_notification_sent_at IS NULL",
 	)
 		.bind(userId, constants.YEAR)
 		.run();
@@ -49,4 +49,16 @@ export function getBookmarksStartingSoon(bookmarks: EnrichedBookmark[]): Enriche
 		
 		return timeDiff > 0 && timeDiff <= 15;
 	});
+}
+
+export async function markNotificationSent(bookmarkId: string, env: Env): Promise<void> {
+	const result = await env.DB.prepare(
+		"UPDATE bookmark SET last_notification_sent_at = CURRENT_TIMESTAMP WHERE id = ?",
+	)
+		.bind(bookmarkId)
+		.run();
+
+	if (!result.success) {
+		throw new Error(`Failed to update last_notification_sent_at for bookmark ${bookmarkId}`);
+	}
 } 
