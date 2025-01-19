@@ -11,7 +11,8 @@ export async function triggerDailySummary(
 	event: { cron: string },
 	env: Env,
 	ctx: ExecutionContext,
-	queueMode = false
+	queueMode = false,
+	isEvening = false
 ) {
 	const whichDay = getCurrentDay();
 
@@ -34,7 +35,7 @@ export async function triggerDailySummary(
 	const results = await Promise.allSettled(
 		subscriptions.results.map(async (subscription) => {
 			console.log(
-				`Processing daily summary for ${subscription.user_id}`,
+				`Processing ${isEvening ? 'evening' : 'morning'} summary for ${subscription.user_id}`,
 			);
 
 			try {
@@ -63,13 +64,13 @@ export async function triggerDailySummary(
 					return;
 				}
 
-				const notification = createDailySummaryPayload(bookmarksToday, whichDay);
+				const notification = createDailySummaryPayload(bookmarksToday, whichDay, isEvening);
 
 				if (queueMode) {
 					await env.NOTIFICATION_QUEUE.send({
 						subscription: typedSubscription,
 						notification,
-						bookmarkId: 'daily-summary'
+						bookmarkId: isEvening ? 'evening-summary' : 'morning-summary'
 					});
 				} else {
 					await sendNotification(typedSubscription, notification, keys, env);
@@ -77,7 +78,7 @@ export async function triggerDailySummary(
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : "Unknown error";
 				console.error(
-					`Error processing daily summary for ${subscription.user_id}: ${errorMessage}`,
+					`Error processing ${isEvening ? 'evening' : 'morning'} summary for ${subscription.user_id}: ${errorMessage}`,
 				);
 				throw error;
 			}
@@ -88,6 +89,6 @@ export async function triggerDailySummary(
 	const failed = results.filter((r) => r.status === "rejected").length;
 
 	console.log(
-		`Successfully ${queueMode ? 'queued' : 'sent'} ${successful} daily summaries, failed to process ${failed}`,
+		`Successfully ${queueMode ? 'queued' : 'sent'} ${successful} ${isEvening ? 'evening' : 'morning'} summaries, failed to process ${failed}`,
 	);
 } 

@@ -24,10 +24,18 @@ export function createNotificationPayload(bookmark: EnrichedBookmark): Notificat
 	};
 }
 
-export function createDailySummaryPayload(bookmarks: EnrichedBookmark[], day: string): NotificationPayload {
+export function createDailySummaryPayload(bookmarks: EnrichedBookmark[], day: string, isEvening = false): NotificationPayload {
 	const totalEvents = bookmarks.length;
 	const firstEvent = bookmarks[0];
 	const lastEvent = bookmarks[bookmarks.length - 1];
+	
+	if (isEvening) {
+		return {
+			title: `FOSDEM Day ${day} Wrap-up`,
+			body: `You attended ${totalEvents} events today! See you ${day === "1" ? "tomorrow" : "next year"}! 🎉`,
+			url: `https://fosdempwa.com/bookmarks?day=${day}&year=${constants.YEAR}`,
+		};
+	}
 	
 	return {
 		title: `Your FOSDEM Day ${day} Summary`,

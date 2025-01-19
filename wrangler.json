@@ -8,7 +8,11 @@
     "enabled": true
   },
   "triggers": {
-    "crons": ["0 9 * * *"]
+    "crons": [
+      "0 9 1,2 2 *",
+      "15 18 1,2 2 *",
+      "*/15 * 1,2 2 *"
+    ]
   },
   "d1_databases": [
     {
