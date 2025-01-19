@@ -5,7 +5,7 @@ import {
 } from "webpush-webcrypto";
 
 import { constants } from "../constants";
-import { createBrusselsDate, getBrusselsTime } from "../utils/date";
+import { createBrusselsDate } from "../utils/date";
 import type { NotificationPayload, Subscription, EnrichedBookmark, Env } from "../types";
 import { trackPushNotificationSuccess, trackPushNotificationFailure } from "./analytics";
 
