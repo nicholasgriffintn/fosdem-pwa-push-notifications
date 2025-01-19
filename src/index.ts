@@ -31,6 +31,7 @@ export default {
 			console.log(`Sending notification to ${subscription.user_id} via ${subscription.endpoint}`);
 
 			if (!subscription.endpoint || !subscription.auth || !subscription.p256dh) {
+				console.error(`Invalid subscription data for user ${subscription.user_id}: ${JSON.stringify(subscription)}`);
 				throw new Error("Invalid subscription data");
 			}
 
@@ -60,6 +61,8 @@ export default {
 				
 				return result;
 			} catch (error: any) {
+				console.error(`Error sending notification to ${subscription.user_id}: ${error.message}`);
+				
 				env.ANALYTICS.writeDataPoint({
 					blobs: [
 						"failure",
