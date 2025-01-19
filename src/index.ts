@@ -4,11 +4,17 @@ import {
 	type PushSubscription
 } from "webpush-webcrypto";
 
+import { constants } from "./constants";
+
 async function trigger(event: { cron?: string }, env: Env, ctx: ExecutionContext) {
 	console.log(`trigger fired at ${event.cron}`);
 
-	if (!env.VAPID_EMAIL || !env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) {
+	if (!constants.VAPID_EMAIL || !constants.VAPID_PUBLIC_KEY) {
 		throw new Error("VAPID details not set");
+	}
+
+	if (!env.VAPID_PRIVATE_KEY) {
+		throw new Error("VAPID private key not set");
 	}
 
 	// TODO: This needs to be done in a much more complex way, this is just for testing at the moment.
@@ -19,7 +25,7 @@ async function trigger(event: { cron?: string }, env: Env, ctx: ExecutionContext
 	// TODO: We need to send a notification to the user if they have bookmarks that are starting soon (15 minutes before)
 	// TODO: Will need some way of detecting if a user has been sent a notification for a bookmark already
 
-	const publicKey = env.VAPID_PUBLIC_KEY;
+	const publicKey = constants.VAPID_PUBLIC_KEY;
 	const privateKey = env.VAPID_PRIVATE_KEY;
 
 	const keys = await ApplicationServerKeys.fromJSON({
@@ -37,9 +43,7 @@ async function trigger(event: { cron?: string }, env: Env, ctx: ExecutionContext
 		"SELECT user_id, endpoint, auth, p256dh FROM subscription",
 	).run();
 
-	console.log(subscriptions);
-
-	if (!subscriptions.results?.length) {
+	if (!subscriptions.success || !subscriptions.results?.length) {
 		throw new Error("No subscriptions found");
 	}
 
@@ -66,7 +70,7 @@ async function trigger(event: { cron?: string }, env: Env, ctx: ExecutionContext
 					applicationServerKeys: keys,
 					payload: JSON.stringify(testNotification),
 					target,
-					adminContact: env.VAPID_EMAIL,
+					adminContact: constants.VAPID_EMAIL,
 					ttl: 60,
 					urgency: "normal"
 				});
