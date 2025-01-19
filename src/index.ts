@@ -27,7 +27,7 @@ export default {
 			throw new Error("No subscriptions found");
 		}
 
-		const sentMessages = await Promise.all(subscriptions.results.map(async (subscription) => {
+		const results = await Promise.allSettled(subscriptions.results.map(async (subscription) => {
 			console.log(`Sending notification to ${subscription.user_id} via ${subscription.endpoint}`);
 
 			if (!subscription.endpoint || !subscription.auth || !subscription.p256dh) {
@@ -42,10 +42,42 @@ export default {
 				},
 			} as PushSubscription;
 
-			return webPush.sendNotification(subscriptionData, JSON.stringify(testNotification));
+			try {
+				const result = await webPush.sendNotification(
+					subscriptionData, 
+					JSON.stringify(testNotification)
+				);
+				
+				env.ANALYTICS.writeDataPoint({
+					blobs: [
+						"success",
+						subscription.user_id as string,
+						subscription.endpoint as string
+					],
+					doubles: [1],
+					indexes: ["push_notification"]
+				});
+				
+				return result;
+			} catch (error: any) {
+				env.ANALYTICS.writeDataPoint({
+					blobs: [
+						"failure",
+						subscription.user_id as string,
+						subscription.endpoint as string,
+						error.message || "Unknown error"
+					],
+					doubles: [1],
+					indexes: ["push_notification"]
+				});
+				
+				throw error;
+			}
 		}));
 
-		console.log(`Sent ${sentMessages.length} messages`);
-		console.log(sentMessages)
+		const successful = results.filter(r => r.status === 'fulfilled').length;
+		const failed = results.filter(r => r.status === 'rejected').length;
+
+		console.log(`Successfully sent ${successful} notifications, failed to send ${failed} notifications`);
 	},
 } satisfies ExportedHandler<Env>;
