@@ -3,8 +3,9 @@ import {
 	generatePushHTTPRequest,
 	type PushSubscription,
 } from "webpush-webcrypto";
+
 import { constants } from "../constants";
-import type { NotificationPayload, Subscription, EnrichedBookmark } from "../types";
+import type { NotificationPayload, Subscription, EnrichedBookmark, Env } from "../types";
 import { trackPushNotificationSuccess, trackPushNotificationFailure } from "./analytics";
 
 export function createNotificationPayload(bookmark: EnrichedBookmark): NotificationPayload {

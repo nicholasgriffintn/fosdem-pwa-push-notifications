@@ -38,4 +38,20 @@ export interface Subscription {
 	endpoint: string;
 	auth: string;
 	p256dh: string;
-} 
+}
+
+export interface QueueMessage {
+	subscription: Subscription;
+	notification: NotificationPayload;
+	bookmarkId: string;
+}
+
+export interface Env {
+	DB: D1Database;
+	DB_PREVIEW: D1Database;
+	ANALYTICS: AnalyticsEngineDataset;
+	NOTIFICATION_QUEUE: Queue<QueueMessage>;
+	VAPID_EMAIL: string;
+	VAPID_PUBLIC_KEY: string;
+	VAPID_PRIVATE_KEY: string;
+}

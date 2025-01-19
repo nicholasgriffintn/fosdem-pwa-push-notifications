@@ -24,5 +24,20 @@
       "binding": "ANALYTICS",
       "dataset": "fosdem-notifications"
     }
-  ]
+  ],
+  "queues": {
+    "producers": [
+      {
+        "queue": "fosdem-notifications",
+        "binding": "NOTIFICATION_QUEUE"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "fosdem-notifications",
+        "max_batch_size": 50,
+        "max_batch_timeout": 30
+      }
+    ]
+  }
 }

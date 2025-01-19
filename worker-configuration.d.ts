@@ -4,7 +4,6 @@ interface Env {
 	DB: D1Database;
 	DB_PREVIEW: D1Database;
 	ANALYTICS: AnalyticsEngineDataset;
-	VAPID_EMAIL: string;
-	VAPID_PUBLIC_KEY: string;
+	NOTIFICATION_QUEUE: Queue;
 	VAPID_PRIVATE_KEY: string;
 }

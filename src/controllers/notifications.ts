@@ -9,19 +9,28 @@ import {
 	markNotificationSent,
 } from "../services/bookmarks";
 import { getApplicationKeys, sendNotification, createNotificationPayload } from "../services/notifications";
-import type { Subscription, EnrichedBookmark } from "../types";
+import type { Subscription, EnrichedBookmark, Env } from "../types";
 
 async function processUserNotifications(
 	subscription: Subscription,
 	bookmarks: EnrichedBookmark[],
 	keys: ApplicationServerKeys,
-	env: Env
+	env: Env,
+	queueMode = false
 ) {
 	await Promise.all(bookmarks.map(async (bookmark) => {
 		try {
 			const notification = createNotificationPayload(bookmark);
-			await sendNotification(subscription, notification, keys, env);
-			await markNotificationSent(bookmark.id, env);
+			if (queueMode) {
+				await env.NOTIFICATION_QUEUE.send({
+					subscription,
+					notification,
+					bookmarkId: bookmark.id
+				});
+			} else {
+				await sendNotification(subscription, notification, keys, env);
+				await markNotificationSent(bookmark.id, env);
+			}
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : "Unknown error";
 			console.error(
@@ -34,7 +43,6 @@ async function processUserNotifications(
 
 export async function triggerTestNotification(env: Env, ctx: ExecutionContext) {
 	const keys = await getApplicationKeys(env);
-	const fosdemData = await getFosdemData();
 
 	const testSubscription = await env.DB.prepare(
 		"SELECT user_id, endpoint, auth, p256dh FROM subscription WHERE user_id = ?",
@@ -53,6 +61,7 @@ export async function triggerTestNotification(env: Env, ctx: ExecutionContext) {
 		p256dh: testSubscription.p256dh as string,
 	};
 
+	const fosdemData = await getFosdemData();
 	const bookmarks = await getUserBookmarks(subscription.user_id, env);
 	const enrichedBookmarks = enrichBookmarks(bookmarks, fosdemData.events);
 	const dayOneBookmarks = getBookmarksForDay(enrichedBookmarks, "1");
@@ -66,9 +75,10 @@ export async function triggerTestNotification(env: Env, ctx: ExecutionContext) {
 }
 
 export async function triggerNotifications(
-	event: { cron?: string },
+	event: { cron: string },
 	env: Env,
 	ctx: ExecutionContext,
+	queueMode = false
 ) {
 	const whichDay = getCurrentDay();
 
@@ -91,7 +101,7 @@ export async function triggerNotifications(
 	const results = await Promise.allSettled(
 		subscriptions.results.map(async (subscription) => {
 			console.log(
-				`Sending notification to ${subscription.user_id} via ${subscription.endpoint}`,
+				`Processing notifications for ${subscription.user_id} via ${subscription.endpoint}`,
 			);
 
 			try {
@@ -115,8 +125,6 @@ export async function triggerNotifications(
 				const enrichedBookmarks = enrichBookmarks(bookmarks, fosdemData.events);
 				const bookmarksRunningToday = getBookmarksForDay(enrichedBookmarks, whichDay);
 
-				console.log("BOOKMARKS RUNNING TODAY", JSON.stringify(bookmarksRunningToday, null, 2));
-
 				if (!bookmarksRunningToday.length) {
 					console.log(`No bookmarks running today for ${typedSubscription.user_id}`);
 					return;
@@ -129,7 +137,7 @@ export async function triggerNotifications(
 					return;
 				}
 
-				await processUserNotifications(typedSubscription, bookmarksStartingSoon, keys, env);
+				await processUserNotifications(typedSubscription, bookmarksStartingSoon, keys, env, queueMode);
 				return;
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : "Unknown error";
@@ -145,6 +153,6 @@ export async function triggerNotifications(
 	const failed = results.filter((r) => r.status === "rejected").length;
 
 	console.log(
-		`Successfully sent ${successful} notifications, failed to send ${failed} notifications`,
+		`Successfully ${queueMode ? 'queued' : 'sent'} ${successful} notifications, failed to process ${failed} notifications`,
 	);
 } 

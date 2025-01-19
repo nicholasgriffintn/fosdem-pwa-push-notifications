@@ -1,4 +1,4 @@
-import type { Subscription } from "../types";
+import type { Subscription, Env } from "../types";
 
 export function trackPushNotificationSuccess(subscription: Subscription, env: Env) {
 	env.ANALYTICS.writeDataPoint({

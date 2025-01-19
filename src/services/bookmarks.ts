@@ -1,5 +1,5 @@
 import { constants } from "../constants";
-import type { FosdemEvent, Bookmark, EnrichedBookmark } from "../types";
+import type { FosdemEvent, Bookmark, EnrichedBookmark, Env } from "../types";
 
 export async function getUserBookmarks(userId: string, env: Env): Promise<Bookmark[]> {
 	const bookmarks = await env.DB.prepare(
