@@ -70,12 +70,6 @@ async function trigger(
 		privateKey,
 	});
 
-	const testNotification = {
-		title: "Test Notification",
-		body: `This is a test notification at ${new Date().toISOString()}`,
-		url: "https://fosdempwa.com",
-	};
-
 	const subscriptions = await env.DB.prepare(
 		"SELECT user_id, endpoint, auth, p256dh FROM subscription",
 	).run();
