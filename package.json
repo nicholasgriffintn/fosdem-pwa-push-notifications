@@ -1,0 +1,20 @@
+{
+  "name": "fosdem-pwa-push-notifications",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --test-scheduled",
+    "start": "wrangler dev --test-scheduled",
+    "cf-typegen": "wrangler types"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250109.0",
+    "@types/web-push": "^3.6.4",
+    "typescript": "^5.5.2",
+    "wrangler": "^3.103.2"
+  },
+  "dependencies": {
+    "web-push": "^3.6.7"
+  }
+}

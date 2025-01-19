@@ -1,0 +1,33 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "fosdem-pwa-push-notifications",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-09",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": [
+      "* * * * *"
+    ]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fosdem",
+      "database_id": "a9e2ef23-b95b-49e4-b1aa-5abc2bd26152"
+    },
+    {
+      "binding": "DB_PREVIEW",
+      "database_name": "fosdem-preview",
+      "database_id": "2ec973b1-6e46-49a8-825b-1928ec34cd22"
+    }
+  ],
+  "analytics_engine_datasets": [
+    {
+      "binding": "ANALYTICS",
+      "dataset": "fosdem-notifications"
+    }
+  ]
+}
