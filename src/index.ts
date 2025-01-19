@@ -8,6 +8,9 @@ export default {
 			throw new Error("VAPID details not set");
 		}
 
+		// TODO: Turns out wrangler doesn't support the crypto api we need, so we may need a different approach.
+		// https://github.com/cloudflare/workerd/discussions/2692
+
 		// TODO: This needs to be done in a much more complex way, this is just for testing at the moment.
 		// TODO: We need to get the latest FOSDEM schedule data
 		// TODO: We need to get a list of subscriptions first for each user
@@ -24,6 +27,7 @@ export default {
 		const testNotification = {
 			title: "Test Notification",
 			body: `This is a test notification at ${new Date().toISOString()}`,
+			url: "https://fosdempwa.com"
 		}
 
 		const subscriptions = await env.DB.prepare("SELECT * FROM subscription").run()
