@@ -1,5 +1,6 @@
 import { constants } from "../constants";
-import type { FosdemEvent, FosdemData } from "../types";
+import { createBrusselsDate } from "../utils/date";
+import type { FosdemData } from "../types";
 
 function getDataLink() {
 	const year = constants.YEAR;
@@ -18,8 +19,8 @@ export async function getFosdemData(): Promise<FosdemData> {
 }
 
 export function getCurrentDay(): string | undefined {
-	const today = new Date();
-	today.setUTCHours(0, 0, 0, 0);
+	const today = createBrusselsDate();
+	today.setHours(0, 0, 0, 0);
 	const todayString = today.toISOString();
 
 	return todayString in constants.DAYS_MAP 
