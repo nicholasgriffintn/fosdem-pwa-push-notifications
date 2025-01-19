@@ -34,19 +34,19 @@ export default {
 		env: Env,
 		ctx: ExecutionContext,
 	): Promise<void> {
-		// Morning summary at 9 AM
-		if (event.cron === "0 9 * * *") {
+		// Morning summary at 8 AM UTC (9 AM Brussels)
+		if (event.cron === "0 8 1,2 2 *") {
 			await triggerDailySummary(event, env, ctx, true, false);
 			return;
 		}
 
-		// Evening summary at 18:15
-		if (event.cron === "15 18 * * *") {
+		// Evening summary at 17:15 UTC (18:15 Brussels)
+		if (event.cron === "15 17 1,2 2 *") {
 			await triggerDailySummary(event, env, ctx, true, true);
 			return;
 		}
 
-		// Regular notifications for starting events
+		// Regular notifications for starting events (every 15 minutes)
 		await triggerNotifications(event, env, ctx, true);
 	},
 	// @ts-ignore - CBA
