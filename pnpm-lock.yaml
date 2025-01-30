@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@sentry/cloudflare':
+        specifier: ^8.52.1
+        version: 8.52.1
       webpush-webcrypto:
         specifier: ^1.0.3
         version: 1.0.3
@@ -220,6 +223,14 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@sentry/cloudflare@8.52.1':
+    resolution: {integrity: sha512-3ACprKFrMFLwsTjTr1M1TvZFQjYdOwTalqFMnQUNqNCkjFUz3NtiqY+/eDYlgEjNnSa/hxTWgATMMsau9fbTeg==}
+    engines: {node: '>=14.18'}
+
+  '@sentry/core@8.52.1':
+    resolution: {integrity: sha512-FG0P9I03xk4jBI4O7NBkw8uqLGH9/RWOSFoRH3eYvUTyBLhkk9IaCFbAAGBNZhojky8T7gqYwnuRbFNlrAiuSA==}
+    engines: {node: '>=14.18'}
 
   acorn-walk@8.3.4:
     resolution: {integrity: sha512-ueEepnujpqee2o5aIYnvHU6C0A42MNdsIDeqy5BydrkuC5R1ZuUFnm27EeFJGoEHJQgn3uleRvmTXaJgfXbt4g==}
@@ -521,6 +532,14 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+
+  '@sentry/cloudflare@8.52.1':
+    dependencies:
+      '@sentry/core': 8.52.1
+    optionalDependencies:
+      '@cloudflare/workers-types': 4.20250109.0
+
+  '@sentry/core@8.52.1': {}
 
   acorn-walk@8.3.4:
     dependencies:
