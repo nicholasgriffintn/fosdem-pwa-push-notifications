@@ -16,28 +16,33 @@ export default Sentry.withSentry(
 	}),
 	{
 		async fetch(request: Request, env: Env, ctx: ExecutionContext) {
-			const url = new URL(request.url);
-			const isTestMode = url.searchParams.has("test");
-			const isDailySummary = url.searchParams.has("daily-summary");
-			const isEveningSummary = url.searchParams.has("evening-summary");
+			try {
+				const url = new URL(request.url);
+				const isTestMode = url.searchParams.has("test");
+				const isDailySummary = url.searchParams.has("daily-summary");
+				const isEveningSummary = url.searchParams.has("evening-summary");
 
-			if (isTestMode) {
-				await triggerTestNotification(env, ctx);
-				return new Response("Test notification sent");
+				if (isTestMode) {
+					await triggerTestNotification(env, ctx);
+					return new Response("Test notification sent");
+				}
+
+				if (isDailySummary) {
+					await triggerDailySummary({ cron: "fetch" }, env, ctx, true, false);
+					return new Response("Morning summary notifications queued");
+				}
+
+				if (isEveningSummary) {
+					await triggerDailySummary({ cron: "fetch" }, env, ctx, true, true);
+					return new Response("Evening summary notifications queued");
+				}
+
+				await triggerNotifications({ cron: "fetch" }, env, ctx, true);
+				return new Response("Notifications queued");
+			} catch (error) {
+				console.error("Error in fetch:", error);
+				return new Response("Error in fetch", { status: 500 });
 			}
-
-			if (isDailySummary) {
-				await triggerDailySummary({ cron: "fetch" }, env, ctx, true, false);
-				return new Response("Morning summary notifications queued");
-			}
-
-			if (isEveningSummary) {
-				await triggerDailySummary({ cron: "fetch" }, env, ctx, true, true);
-				return new Response("Evening summary notifications queued");
-			}
-
-			await triggerNotifications({ cron: "fetch" }, env, ctx, true);
-			return new Response("Notifications queued");
 		},
 		async scheduled(
 			event: { cron: string },

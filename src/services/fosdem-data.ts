@@ -20,8 +20,17 @@ export async function getFosdemData(): Promise<FosdemData> {
 
 export function getCurrentDay(): string | undefined {
 	const today = createBrusselsDate();
-	today.setHours(0, 0, 0, 0);
-	const todayString = today.toISOString();
+	
+	const midnightBrussels = new Date(
+		new Intl.DateTimeFormat('nl-BE', {
+			timeZone: 'Europe/Brussels',
+			year: 'numeric',
+			month: '2-digit',
+			day: '2-digit'
+		}).format(today).replace(/(\d+)\/(\d+)\/(\d+)/, '$3-$1-$2') + 'T00:00:00.000Z'
+	);
+	
+	const todayString = midnightBrussels.toISOString();
 
 	return todayString in constants.DAYS_MAP 
 		? constants.DAYS_MAP[todayString as keyof typeof constants.DAYS_MAP]

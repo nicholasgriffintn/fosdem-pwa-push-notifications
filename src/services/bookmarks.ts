@@ -21,6 +21,10 @@ export function enrichBookmarks(bookmarks: Bookmark[], events: { [key: string]: 
 			throw new Error(`Invalid slug for bookmark ${bookmark.slug}`);
 		}
 
+		if (!bookmark.slug) {
+			throw new Error(`Invalid slug for bookmark: ${JSON.stringify(bookmark)}`);
+		}
+
 		const event = events[bookmark.slug];
 
 		if (!event) {
@@ -35,6 +39,10 @@ export function enrichBookmarks(bookmarks: Bookmark[], events: { [key: string]: 
 }
 
 export function getBookmarksForDay(bookmarks: EnrichedBookmark[], day: string): EnrichedBookmark[] {
+	if (!day) {
+		throw new Error(`Invalid day: ${day}`);
+	}
+
 	return bookmarks.filter((bookmark) => bookmark.day === day);
 }
 
