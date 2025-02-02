@@ -5,18 +5,20 @@ import {
 } from "webpush-webcrypto";
 
 import { constants } from "../constants";
-import { createBrusselsDate } from "../utils/date";
 import type { NotificationPayload, Subscription, EnrichedBookmark, Env } from "../types";
 import { trackPushNotificationSuccess, trackPushNotificationFailure } from "./analytics";
 
 export function createNotificationPayload(bookmark: EnrichedBookmark): NotificationPayload {
 	const [hours, minutes] = bookmark.startTime.split(":").map(Number);
-	const now = createBrusselsDate();
-	const startTime = new Date(now);
+	const now = new Date();
+	
+	const startTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Brussels' }));
 	startTime.setHours(hours, minutes, 0, 0);
 	
+	const brusselsNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Brussels' }));
+	
 	const minutesUntilStart = Math.ceil(
-		(startTime.getTime() - now.getTime()) / (1000 * 60)
+		(startTime.getTime() - brusselsNow.getTime()) / (1000 * 60)
 	);
 
 	return {

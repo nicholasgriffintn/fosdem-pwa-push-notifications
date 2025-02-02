@@ -50,10 +50,13 @@ export function getBookmarksStartingSoon(bookmarks: EnrichedBookmark[]): Enriche
 	return bookmarks.filter((bookmark) => {
 		const [hours, minutes] = bookmark.startTime.split(":").map(Number);
 		const now = new Date();
-		const eventTime = new Date(now);
+		
+		const eventTime = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Brussels' }));
 		eventTime.setHours(hours, minutes, 0, 0);
 		
-		const timeDiff = (eventTime.getTime() - now.getTime()) / (1000 * 60);
+		const brusselsNow = new Date(now.toLocaleString('en-US', { timeZone: 'Europe/Brussels' }));
+		
+		const timeDiff = (eventTime.getTime() - brusselsNow.getTime()) / (1000 * 60);
 		
 		return timeDiff > 0 && timeDiff <= 15;
 	});
