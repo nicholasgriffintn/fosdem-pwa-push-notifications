@@ -1,20 +1,50 @@
 {
-  "name": "fosdem-pwa-push-notifications",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "deploy": "wrangler deploy",
-    "dev": "wrangler dev --test-scheduled",
-    "start": "wrangler dev --test-scheduled",
-    "cf-typegen": "wrangler types"
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":combinePatchMinorReleases",
+    ":dependencyDashboard",
+    ":enableVulnerabilityAlertsWithLabel(vulnerability)",
+    ":prConcurrentLimit10",
+    ":prHourlyLimit4",
+    ":prNotPending",
+    ":preserveSemverRanges",
+    ":rebaseStalePrs",
+    ":semanticCommits",
+    ":semanticPrefixFixDepsChoreOthers",
+    ":label(dependencies)",
+    ":timezone(Europe/London)",
+    "docker:enableMajor",
+    "docker:pinDigests",
+    "group:postcss",
+    "group:linters",
+    "group:monorepos",
+    "npm:unpublishSafe",
+    "customManagers:dockerfileVersions",
+    "replacements:all"
+  ],
+  "rangeStrategy": "update-lockfile",
+  "dependencyDashboardAutoclose": true,
+  "platformAutomerge": true,
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
   },
-  "devDependencies": {
-    "@cloudflare/workers-types": "^4.20250109.0",
-    "typescript": "^5.5.2",
-    "wrangler": "^3.103.2"
+  "vulnerabilityAlerts": {
+    "labels": [
+      "security"
+    ],
+    "automerge": true
   },
-  "dependencies": {
-    "@sentry/cloudflare": "^8.52.1",
-    "webpush-webcrypto": "^1.0.3"
-  }
+  "minimumReleaseAge": "3 days",
+  "packageRules": [
+    {
+      "description": "Automerge non-major updates",
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
+    }
+  ]
 }
